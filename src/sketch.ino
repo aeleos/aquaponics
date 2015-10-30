@@ -1,3 +1,4 @@
+
 #include <Wire.h> //Include I2C Library
 #include <avr/eeprom.h> //Include EEPROM Library for storing pH Sensor Calibration data
 #include "DHT.h" //Include air moisture and temp sensor Library
@@ -26,7 +27,7 @@ float humidity;
 float temperature;
 
 //Moisture sensor Initial variables
-#define MOISTURE_PIN A0
+#define MOISTURE_PIN 3
 int moisture = 0;
 
 
@@ -40,7 +41,7 @@ void setup() //setup
   {
     reset_Params(); //It is, so reset to default
   }
-  pinMode(MOISTURE_PIN, OUTPUT); //Set the Moisture sensor analog pin as OUTPUT
+  pinMode(A1 + MOISTURE_PIN, OUTPUT); //Set the Moisture sensor analog pin as OUTPUT
   dht.begin(); //Begin reading data from air temp and humidity sensor
 }
 
@@ -56,8 +57,9 @@ void loop()
     Serial.print("C");
     //Read and Print Moisture Data
     moisture = readSensor(MOISTURE_PIN);
+    //moisture = analogRead(A0);    
     Serial.print(" Moisture: ");
-    Serial.print(moisture);
+    Serial.print(moisture, DEC);
 
     pH = readpH(ADDRESS);
     Serial.print(" pH: ");
@@ -74,11 +76,11 @@ void reset_Params(void)
   eeprom_write_block(&params, (void *)0, sizeof(params)); //write these settings back to eeprom
 }
 
-void calcpH(int raw)
+float calcpH(int raw)
 {
  float miliVolts = (((float)raw/4096)*vRef)*1000;
  float temp = ((((vRef*(float)params.pH7Cal)/4096)*1000)- miliVolts)/opampGain;
- pH = 7-(temp/params.pHStep);
+ return (7-(temp/params.pHStep));
 }
 
 void calcpHSlope ()
@@ -110,36 +112,10 @@ float readpH( int address )
   int adc_result;
   Wire.requestFrom(address, 2);
   while (Wire.available() < 2);
-    adc_high = Wire.read();
-    adc_low = Wire.read();
-    adc_result - (adc_high * 256) + adc_low;
-    calcpH(adc_result);
-    if(Serial.available() )
-    {
-      char c = Serial.read();
-      if( c == 'C')
-      {
-        int calrange;
-        calrange = Serial.parseInt();
-        if ( calrange == 4 )
-          calibratepH4(adc_result);
-        if ( calrange == 4 )
-          calibratepH7(adc_result);
-      }
-      if (c == 'I')
-      {
-        eeprom_read_block(&params, (void *)0, sizeof(params));
-        Serial.print("pH 7 cal: ");
-        Serial.print(params.pH7Cal);
-        Serial.print(" | ");
-        Serial.print("pH 4 cal: ");
-        Serial.print(params.pH4Cal);
-        Serial.print(" | ");
-        Serial.print("pH probe slope: ");
-        Serial.println(params.pHStep);
-      }
-    }
-  return adc_result;
+  adc_high = Wire.read();
+  adc_low = Wire.read();
+  adc_result = (adc_high * 256) + adc_low;
+  return calcpH(adc_result);
 }
 int readSensor( int analogPin ) {
   digitalWrite( A1 + analogPin, HIGH );
