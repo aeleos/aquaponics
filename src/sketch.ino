@@ -22,8 +22,8 @@ const float opampGain = 5.25; //Gain for the opampp on the pH Sensor
 #define DHTTYPE DHT22 //Version of sensor being unsed
 #define DHTPIN A1 //Pin that sensor is on
 DHT dht(DHTPIN, DHTTYPE); //Create DHT function and assign it to DHTPIN
-float humididty;
-float tempurture;
+float humidity;
+float temperature;
 
 //Moisture sensor Initial variables
 #define MOISTURE_PIN A0
@@ -35,7 +35,7 @@ void setup() //setup
   Wire.begin(); //Initialize I2C communication with pH sensor
   Serial.begin(9600); //Initialize serial communication at 9600 baud
   eeprom_read_block(&params, (void *)0, sizeof(params)); //Read data block from EEPROM
-  Seria.println(params.pHStep); //Read pHStep from the data structure
+  Serial.println(params.pHStep); //Read pHStep from the data structure
   if (params.WriteCheck != Write_Check) //Check to see if config is wrong or it is first time
   {
     reset_Params(); //It is, so reset to default
@@ -46,14 +46,14 @@ void setup() //setup
 
 void loop()
 {
-    humididty = dht.readHumidity(); //Read Humidity dataa
-    tempurture = dht.readTempurture();  //Read Tempurture Data
+    humidity = dht.readHumidity(); //Read Humidity dataa
+    temperature = dht.readTemperature();  //Read Tempurture Data
     //Printing Data
-    Serial.println("Humidity: ");
+    Serial.print("Humidity: ");
     Serial.print(humidity);
-    Serial.print(" Tempurture: ");
-    Serial.print(tempurture);
-
+    Serial.print("% Tempurture: ");
+    Serial.print(temperature);
+    Serial.print("C");
     //Read and Print Moisture Data
     moisture = readSensor(MOISTURE_PIN);
     Serial.print(" Moisture: ");
@@ -61,7 +61,8 @@ void loop()
 
     pH = readpH(ADDRESS);
     Serial.print(" pH: ");
-    Serial.print(pH);
+    Serial.println(pH);
+    delay(1000);
 }
 
 void reset_Params(void)
@@ -108,8 +109,7 @@ float readpH( int address )
   byte adc_low;
   int adc_result;
   Wire.requestFrom(address, 2);
-  while (Wire.availale() < 2)
-  {
+  while (Wire.available() < 2);
     adc_high = Wire.read();
     adc_low = Wire.read();
     adc_result - (adc_high * 256) + adc_low;
@@ -139,7 +139,12 @@ float readpH( int address )
         Serial.println(params.pHStep);
       }
     }
-
-  }
   return adc_result;
+}
+int readSensor( int analogPin ) {
+  digitalWrite( A1 + analogPin, HIGH );
+  delay( 1 ); // 1 millisecond
+  int value = analogRead( analogPin );
+  digitalWrite( A1 + analogPin, LOW );
+  return value;
 }
