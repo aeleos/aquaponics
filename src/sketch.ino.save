@@ -1,0 +1,7 @@
+
+#include <Wire.h> //Include I2C Library
+#include <avr/eeprom.h> //Include EEPROM Library for storing pH Sensor Calibration data
+#include "DHT.h" //Include air moisture and temp sensor Library
+
+//Ph Sensor Initial variables
+#define Write_Check 0x1234

@@ -2,9 +2,6 @@
 #include <Wire.h> //Include I2C Library
 #include <avr/eeprom.h> //Include EEPROM Library for storing pH Sensor Calibration data
 #include "DHT.h" //Include air moisture and temp sensor Library
-#include <OneWire.h>
-#include <DallasTemperature.h>
-
 
 //Ph Sensor Initial variables
 #define Write_Check 0x1234
@@ -33,15 +30,9 @@ float temperature;
 #define MOISTURE_PIN 3
 int moisture = 0;
 
-//Water Temp Stuff
+/Water Temp sensor initial variables
 #define WATER_TEMP_PIN 2
-#define TEMPERATURE_PRECISION 9
-
-OneWire oneWire(WATER_TEMP_PIN);
-DallasTemperature sensors(&oneWire);
-int numberOfDevices;
-DeviceAddress tempDeviceAddress;
-
+#define TEMPERATURE_PRECISION
 
 void setup() //setup
 {
@@ -55,17 +46,7 @@ void setup() //setup
   }
   pinMode(A1 + MOISTURE_PIN, OUTPUT); //Set the Moisture sensor analog pin as OUTPUT
   dht.begin(); //Begin reading data from air temp and humidity sensor
-  sensors.begin();
-  numberOfDevices = sensors.getDeviceCount();
-  for(int i =0; i < numberOfDevices; i++)
-  {
-	if(sensors.getAddress(tempDeviceAddress, i))
-	{
-	  sensors.setResolution(tempDeviceAddress, TEMPERATURE_PRECISION);
-	}
-  }
-  
- }
+}
 
 void loop()
 {
@@ -85,15 +66,7 @@ void loop()
 
     pH = readpH(ADDRESS);
     Serial.print(" pH: ");
-    Serial.print(pH);
-	
-	for(int i =0; i<numberOfDevices; i++)
-	{
-	  if(sensors.getAddress(tempDeviceAddress, i))
-	  {
-		printTemperature(tempDeviceAddress);
-	  }
-	}
+    Serial.println(pH);
     delay(1000);
 }
 
@@ -153,20 +126,4 @@ int readSensor( int analogPin ) {
   int value = analogRead( analogPin );
   digitalWrite( A1 + analogPin, LOW );
   return value;
-}
-
-void printTemperature(DeviceAddress deviceAddress)
-{
-  // method 1 - slower
-  //Serial.print("Temp C: ");
-  //Serial.print(sensors.getTempC(deviceAddress));
-  //Serial.print(" Temp F: ");
-  //Serial.print(sensors.getTempF(deviceAddress)); // Makes a second call to getTempC and then converts to Fahrenheit
-
-  // method 2 - faster
-  float tempC = sensors.getTempC(deviceAddress);
-  Serial.print("Temp C: ");
-  Serial.print(tempC);
-  Serial.print(" Temp F: ");
-  Serial.println(DallasTemperature::toFahrenheit(tempC)); // Converts tempC to Fahrenheit
 }
