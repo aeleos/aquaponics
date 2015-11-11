@@ -17,6 +17,6 @@ if pgrep mjpg_streamer > /dev/null
 then
     echo "mjpg_streamer already running"
 else
-    LD_LIBRARY_PATH=/usr/local/lib mjpg_streamer -i "input_file.so -f /tmp/stream -n pic.jpg" -o "output_http.so -p 9000 -w /usr/local/www" > /dev/null 2>&1&
+    LD_LIBRARY_PATH=/usr/local/lib mjpg_streamer -i "input_file.so -f /tmp/stream -n pic.jpg" -o "output_http.so -p 8000 -w /usr/local/www" > /dev/null 2>&1&
     echo "mjpg_streamer started"
 fi
