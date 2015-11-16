@@ -5,9 +5,53 @@ var io = require('socket.io')(http);
 var path = require('path');
 var spawn = require('child_process').spawn;
 var fs = require('fs');
+var sp = require('serialport');
+var SerialPort = require("serialport").SerialPort
+var serialPort = new SerialPort('/dev/ttyACM0', {
+  baudRate: 9600,
+  parser: sp.parsers.readline("\n")
+});
 var proc;
+var humidity; //1
+var airtemp; //2
+var watertemp; //3
+var ph; //4
+var moisture; //5
 
 var sockets = {};
+
+serialPort.on('data', onData);
+
+function onData(data){
+  if (data.charAt(0) == 1){
+    console.log("DATA RECOGNIZED AS: humidity");
+    console.log(data.substr(2, data.length));
+	var humidity = data.substr(2, data.length)
+	
+  } else if (data.charAt(0) == 2){
+    console.log("DATA RECOGNIZED AS: airtemp");
+    console.log(data.substr(2, data.length));
+	var airtemp = data.substr(2, data.length)
+	
+  } else if (data.charAt(0) == 3){
+    console.log("DATA RECOGNIZED AS: watertemp");
+    console.log(data.substr(2, data.length));
+	var watertemp = data.substr(2, data.length)
+	
+  } else if (data.charAt(0) == 4){
+    console.log("DATA RECOGNIZED AS: ph");
+    console.log(data.substr(2, data.length));
+	var ph = data.substr(2, data.length)
+
+  } else if (data.charAt(0) == 5){
+    console.log("DATA RECOGNIZED AS: moisture");
+    console.log(data.substr(2, data.length));
+	var moisture = data.substr(2, data.length)
+
+  } else {
+    console.log("ERROR: DATA INPUT NOT RECOGNIZED");
+  }
+}
 
 io.on('connection', function(socket){
   sockets[socket.id] = socket;

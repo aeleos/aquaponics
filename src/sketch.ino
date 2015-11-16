@@ -72,26 +72,29 @@ void loop()
     humidity = dht.readHumidity(); //Read Humidity dataa
     temperature = dht.readTemperature();  //Read Tempurture Data
     //Printing Data
-    Serial.print("Humidity: ");
-    Serial.print(humidity);
-    Serial.print("% Tempurture: ");
-    Serial.print(temperature);
-    Serial.print("C");
+    Serial.print("1.");
+    Serial.println(humidity);
+    Serial.print("2.");
+    Serial.println(temperature);
+    // Serial.print("C");
     //Read and Print Moisture Data
     moisture = readSensor(MOISTURE_PIN);
     //moisture = analogRead(A0);    
-    Serial.print(" Moisture: ");
-    Serial.print(moisture, DEC);
+    Serial.print("5.");
+    Serial.println(moisture, DEC);
 
     pH = readpH(ADDRESS);
-    Serial.print(" pH: ");
-    Serial.print(pH);
+    Serial.print("4.");
+    Serial.println(pH);
 	
 	for(int i =0; i<numberOfDevices; i++)
 	{
 	  if(sensors.getAddress(tempDeviceAddress, i))
 	  {
-		printTemperature(tempDeviceAddress);
+		float tempC = sensors.getTempC(tempDeviceAddress);
+		Serial.print("3.");
+		Serial.println(tempC);
+
 	  }
 	}
     delay(1000);
@@ -155,18 +158,3 @@ int readSensor( int analogPin ) {
   return value;
 }
 
-void printTemperature(DeviceAddress deviceAddress)
-{
-  // method 1 - slower
-  //Serial.print("Temp C: ");
-  //Serial.print(sensors.getTempC(deviceAddress));
-  //Serial.print(" Temp F: ");
-  //Serial.print(sensors.getTempF(deviceAddress)); // Makes a second call to getTempC and then converts to Fahrenheit
-
-  // method 2 - faster
-  float tempC = sensors.getTempC(deviceAddress);
-  Serial.print("Temp C: ");
-  Serial.print(tempC);
-  Serial.print(" Temp F: ");
-  Serial.println(DallasTemperature::toFahrenheit(tempC)); // Converts tempC to Fahrenheit
-}
