@@ -24,30 +24,29 @@ serialPort.on('data', onData);
 
 function onData(data){
   if (data.charAt(0) == 1){
-    console.log("DATA RECOGNIZED AS: humidity");
-    console.log(data.substr(2, data.length));
-	var humidity = data.substr(2, data.length)
-	
+    // console.log("DATA RECOGNIZED AS: humidity");
+	humidity = data.substr(2, data.length);
+	// console.log(humidity);
+
   } else if (data.charAt(0) == 2){
-    console.log("DATA RECOGNIZED AS: airtemp");
-    console.log(data.substr(2, data.length));
-	var airtemp = data.substr(2, data.length)
-	
+    // console.log("DATA RECOGNIZED AS: airtemp");
+	airtemp = data.substr(2, data.length);
+	// console.log(airtemp);
+
   } else if (data.charAt(0) == 3){
-    console.log("DATA RECOGNIZED AS: watertemp");
-    console.log(data.substr(2, data.length));
-	var watertemp = data.substr(2, data.length)
+    // console.log("DATA RECOGNIZED AS: watertemp");
+	watertemp = data.substr(2, data.length);
+	// console.log(watertemp);
 	
   } else if (data.charAt(0) == 4){
-    console.log("DATA RECOGNIZED AS: ph");
-    console.log(data.substr(2, data.length));
-	var ph = data.substr(2, data.length)
+    // console.log("DATA RECOGNIZED AS: ph");
+	ph = data.substr(2, data.length);
+	// console.log(ph);
 
   } else if (data.charAt(0) == 5){
-    console.log("DATA RECOGNIZED AS: moisture");
-    console.log(data.substr(2, data.length));
-	var moisture = data.substr(2, data.length)
-
+    // console.log("DATA RECOGNIZED AS: moisture");
+	moisture = data.substr(2, data.length);
+	// console.log(moisture);
   } else {
     console.log("ERROR: DATA INPUT NOT RECOGNIZED");
   }
@@ -71,7 +70,12 @@ io.on('connection', function(socket){
   socket.on('start-stream', function() {
     startStreaming(io);
   });
-
+  
+  socket.on('start-datastream', function() {
+	  console.log(humidity);
+	 io.sockets.emit('humidity', { hello: ph });
+  });
+	
 
 });
 
@@ -114,3 +118,5 @@ function startStreaming(io) {
   })
  
 }
+
+

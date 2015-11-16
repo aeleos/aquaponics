@@ -27,10 +27,16 @@
     $('#stream').attr('src', url);
     $('.start').hide();
   });
- 
-  
+  socket.on('humidity', function(data){
+	document.getElementById("demo").innerHTML = data.hello;
+  });
     socket.emit('start-stream');
-  
+	socket.emit('start-datastream');
+	
+	window.onload = function() {
+  <!-- document.getElementById("demo").innerHTML = shit; -->
+}
+
   </script>
 
 	</head>
@@ -91,7 +97,7 @@
 				<h3 class="panel-title">Live Data</h3>
 			</div>
 			<div class="panel-body">
-
+			<p id="demo"><p>
 		</div>
 	</div>
   </div>
