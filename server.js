@@ -50,6 +50,12 @@ function onData(data){
   } else {
     console.log("ERROR: DATA INPUT NOT RECOGNIZED");
   }
+  io.sockets.emit('humidity', { humidity: humidity });
+  io.sockets.emit('airtemp', { airtemp: airtemp });
+  io.sockets.emit('watertemp', { watertemp: watertemp });
+  io.sockets.emit('ph', { ph: ph });
+  io.sockets.emit('moisture', { moisture: moisture });
+
 }
 
 io.on('connection', function(socket){
@@ -73,7 +79,6 @@ io.on('connection', function(socket){
   
   socket.on('start-datastream', function() {
 	  console.log(humidity);
-	 io.sockets.emit('humidity', { hello: ph });
   });
 	
 

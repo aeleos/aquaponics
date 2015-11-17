@@ -7,6 +7,7 @@
 		<meta name="generator" content="Bootply" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 		<link href="css/bootstrap.min.css" rel="stylesheet">
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
 		<!--[if lt IE 9]>
 			<script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
 		<![endif]-->
@@ -22,22 +23,48 @@
  
         <script src="/socket.io/socket.io.js"></script>
         <script>
+	var humidity; //1
+var airtemp; //2
+var watertemp; //3
+var ph = 0; //4
+var moisture; //5
   var socket = io();
   socket.on('liveStream', function(url) {
     $('#stream').attr('src', url);
     $('.start').hide();
   });
   socket.on('humidity', function(data){
-	document.getElementById("demo").innerHTML = data.hello;
+	document.getElementById("humidity").innerHTML = data.humidity;
+	humidity = data.humidity;
   });
-    socket.emit('start-stream');
+ 
+   socket.on('airtemp', function(data){
+	document.getElementById("airtemp").innerHTML = data.airtemp;
+	airtemp = data.airtemp;
+  });
+  
+  socket.on('watertemp', function(data){
+	document.getElementById("watertemp").innerHTML = data.watertemp;
+	watertemp = data.watertemp;
+  });
+   
+  socket.on('ph', function(data){
+	document.getElementById("ph").innerHTML = data.ph;
+	ph = data.ph;
+  });
+    
+  socket.on('moisture', function(data){
+	document.getElementById("moisture").innerHTML = data.moisture;
+	moisture = data.moisture;
+  });
+    
+	socket.emit('start-stream');
 	socket.emit('start-datastream');
 	
 	window.onload = function() {
   <!-- document.getElementById("demo").innerHTML = shit; -->
 }
-
-  </script>
+ </script>
 
 	</head>
 	<body>
@@ -97,7 +124,28 @@
 				<h3 class="panel-title">Live Data</h3>
 			</div>
 			<div class="panel-body">
-			<p id="demo"><p>
+			<p>	
+			<span>Humidity: </span>
+			<span id="humidity"></span>
+			<span>%</span>
+			</p>
+			<p>
+			<span>Air Temperature: </span>
+			<span id="airtemp"></span>
+			<span>C</span>
+			</p>
+			<p>
+			<span>Water Temperature: </span>
+			<span id="watertemp"><span>
+			</p>
+			<p>
+			<span>pH: </span>
+			<span id="ph"><span>
+			</p>
+			<p>
+			<span>Soil Moisture: </span>
+			<span id="moisture"><span>
+			</p>
 		</div>
 	</div>
   </div>
