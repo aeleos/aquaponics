@@ -11,6 +11,8 @@ var serialPort = new SerialPort('/dev/ttyACM0', {
   baudRate: 9600,
   parser: sp.parsers.readline("\n")
 });
+var dl = require('delivery');
+var delivery = dl.listen(io);
 var proc;
 var humidity; //1
 var airtemp; //2
@@ -19,6 +21,22 @@ var ph; //4
 var moisture; //5
 
 var sockets = {};
+
+var cameraOptions = {
+    width       : 640,
+    height      : 480,
+    mode        : "photo",
+    awb         : 'cloud',
+    output      : 'public/image_stream.jpg',
+    q           : 50,
+    //rot         : 270,
+    nopreview   : true,
+    timeout     : 0,
+    timelapse   : 500,
+};
+
+var camera = new require("raspicam")(cameraOptions);
+// camera.start();
 
 serialPort.on('data', onData);
 
@@ -67,18 +85,16 @@ io.on('connection', function(socket){
  
     // no more sockets, kill the stream
     if (Object.keys(sockets).length == 0) {
-      app.set('watchingFile', false);
-      if (proc) proc.kill();
-      fs.unwatchFile('./stream/image_stream.jpg');
+		camera.stop();
     }
   });
- 
-  socket.on('start-stream', function() {
-    startStreaming(io);
-  });
+
   
   socket.on('start-datastream', function() {
 	  console.log(humidity);
+  });
+   socket.on('start-stream', function() {
+    startStreaming(io);
   });
 	
 
@@ -88,40 +104,66 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', express.static(path.join(__dirname, 'stream')));
 
+// app.use('/', express.static(path.join(__dirname, 'images')));
+
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
 });
+
+
 
 http.listen(80, function(){
   console.log('listening on *:80');
 });
 
+
+// camera.on("read", function(err, timestamp, filename){ 
+    // delivery.send({
+      // name: '-camera.jpg',
+      // path : './images/camera.jpg'
+    // });
+
+// });
+
+
+
+// camera.on("exit", function()
+// {
+    // camera.stop();
+    // console.log('Restarting camera...')
+    // camera.start()
+// });
+
 function stopStreaming() {
   if (Object.keys(sockets).length == 0) {
-    app.set('watchingFile', false);
-    if (proc) proc.kill();
-    fs.unwatchFile('./stream/image_stream.jpg');
+    // app.set('watchingFile', false);
+    // if (proc) proc.kill();
+    // fs.unwatchFile('./public/image_stream.jpg');
+	camera.stop();
   }
 }
-
+ 
 function startStreaming(io) {
  
-  if (app.get('watchingFile')) {
+  if (!camera.start()) {
     io.sockets.emit('liveStream', 'image_stream.jpg?_t=' + (Math.random() * 100000));
     return;
   }
  
-  var args = ["-w", "640", "-h", "480", "-o", "./stream/image_stream.jpg", "-t", "999999999", "-tl", "100"];
-  proc = spawn('raspistill', args);
+  // var args = ["-w", "640", "-h", "480", "-o", "./public/image_stream.jpg", "-t", "999999999", "-tl", "100"];
+  // proc = spawn('raspistill', args);
+  camera.start();
  
   console.log('Watching for changes...');
  
-  app.set('watchingFile', true);
- 
-  fs.watchFile('./stream/image_stream.jpg', function(current, previous) {
-    io.sockets.emit('liveStream', 'image_stream.jpg?_t=' + (Math.random() * 100000));
-  })
+
  
 }
+
+camera.on("read", function(err, timestamp, filename){ 
+    io.sockets.emit('liveStream', 'image_stream.jpg?_t=' + (Math.random() * 100000));
+});
+
+
 
 

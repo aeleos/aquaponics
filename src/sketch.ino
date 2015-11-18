@@ -30,7 +30,7 @@ float humidity;
 float temperature;
 
 //Moisture sensor Initial variables
-#define MOISTURE_PIN 3
+#define MOISTURE_PIN 0
 int moisture = 0;
 
 //Water Temp Stuff
@@ -39,8 +39,7 @@ int moisture = 0;
 
 OneWire oneWire(WATER_TEMP_PIN);
 DallasTemperature sensors(&oneWire);
-int numberOfDevices;
-DeviceAddress tempDeviceAddress;
+
 
 
 void setup() //setup
@@ -56,15 +55,7 @@ void setup() //setup
   pinMode(A1 + MOISTURE_PIN, OUTPUT); //Set the Moisture sensor analog pin as OUTPUT
   dht.begin(); //Begin reading data from air temp and humidity sensor
   sensors.begin();
-  numberOfDevices = sensors.getDeviceCount();
-  for(int i =0; i < numberOfDevices; i++)
-  {
-	if(sensors.getAddress(tempDeviceAddress, i))
-	{
-	  sensors.setResolution(tempDeviceAddress, TEMPERATURE_PRECISION);
-	}
-  }
-  
+
  }
 
 void loop()
@@ -86,17 +77,10 @@ void loop()
     pH = readpH(ADDRESS);
     Serial.print("4.");
     Serial.println(pH);
-	
-	for(int i =0; i<numberOfDevices; i++)
-	{
-	  if(sensors.getAddress(tempDeviceAddress, i))
-	  {
-		float tempC = sensors.getTempC(tempDeviceAddress);
-		Serial.print("3.");
-		Serial.println(tempC);
+    sensors.requestTemperatures();
+    Serial.print("3.");
+    Serial.println(sensors.getTempCByIndex(0));
 
-	  }
-	}
     delay(1000);
 }
 
@@ -157,4 +141,3 @@ int readSensor( int analogPin ) {
   digitalWrite( A1 + analogPin, LOW );
   return value;
 }
-
